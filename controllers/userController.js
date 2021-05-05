@@ -1,3 +1,5 @@
+const userModel = require('../models/userModel.js');
+
 const userController = {
 
     register: async (req, res) => {

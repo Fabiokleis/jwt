@@ -8,4 +8,4 @@ db.once('open', () => {
     console.log('we are connected!');
 })
 
-module.exports = {mongoose, db};
+module.exports = db;
