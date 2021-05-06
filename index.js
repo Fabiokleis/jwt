@@ -3,7 +3,7 @@ const app = express();
 const userRouter = require('./routes/userRouter');
 
 
-app.use('/user', userRouter);
+app.use('/user', express.json(),userRouter);
 require('dotenv').config();
 const db = require('./database/database.js');
 
