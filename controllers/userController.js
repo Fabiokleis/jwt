@@ -1,25 +1,39 @@
 const User = require('../models/userModel.js');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { registerValidate, loginValidate } = require('./validate.js');
+
 
 const userController = {
 
     register: async (req, res) => {
-       
+      
+        const { error } = registerValidate(req.body);
+        if(error) return res.status(400).send(error.message);
+
+
+        const selectedUser = await User.findOne({ email: req.body.email });
+        if(selectedUser) return res.status(400).send("Email exists");
+
         const user = new User({
             name: req.body.name,
             email: req.body.email,
-            password: bcrypt.hashSync(req.body.password)
+            password: bcrypt.hashSync(req.body.password),
+            admin: req.body.admin
         });
 
         try{
             const savedUser = await user.save();
-            res.status(200).send(savedUser);
+            res.status(201).send(savedUser);
         }catch(err){
             res.status(400).send(err);
         }
     },
 
     login: async (req, res) => {
+        const { error } = loginValidate(req.body);
+        if(error) return res.status(400).send(error.message);
+
         const email = req.body.email;
         const passwd = req.body.password;
 
@@ -32,7 +46,10 @@ const userController = {
             if(!hashReturn){
                 return res.status(400).send("email or password incorrect!!");
             }
-            res.status(200).send("logged");
+            const token = jwt.sign({_id: queryUser._id, admin: queryUser.admin}, process.env.TOKEN_SECRET);
+            res.header('authorization-token', token);
+            res.send("User logged");
+        
         }catch(err){
             console.log(err);
             res.status(400).send(err.message);
