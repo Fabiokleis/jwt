@@ -19,20 +19,23 @@ const userController = {
         }
     },
 
-    login: async (req, res, next) => {
+    login: async (req, res) => {
         const email = req.body.email;
         const passwd = req.body.password;
 
         try{
             const queryUser = await User.findOne({email});
-            const hash = bcrypt.compareSync(passwd, queryUser.password);            
-            if(hash){
-               res.status(200).send(hash);
+            if(!queryUser){
+                return res.status(400).send("email or password incorrect!");
             }
-            next();
+            const hashReturn = bcrypt.compareSync(passwd, queryUser.password)
+            if(!hashReturn){
+                return res.status(400).send("email or password incorrect!!");
+            }
+            res.status(200).send("logged");
         }catch(err){
-            console.log("ola mundo");
-            res.status(400).send(err);
+            console.log(err);
+            res.status(400).send(err.message);
         }
            },
     deleteUser: async (req, res) => {
